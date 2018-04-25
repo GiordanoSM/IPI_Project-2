@@ -76,7 +76,8 @@ void SaltAndPepperFilteringCb (cv::Mat YCrCb_image, cv::Mat filtered_image)
 void MultipleImagesAverageY (cv::Mat filtered_image) 
 {
 	int counter = 1, number_images = 100;
-	int rows, cols;
+	int rows, cols;\
+	int print = 0;
 	std::string address = "../images/";
 	std::string extension = ".bmp"; // Extensao do arquivo
 	std::string number;
@@ -90,7 +91,8 @@ void MultipleImagesAverageY (cv::Mat filtered_image)
 	name = address + number + extension;
 	current_image = cv::imread (name);
 
-	std::cout << name << std::endl;
+	if (print)
+		std::cout << name << std::endl;
 
 	current_image = current_image / number_images;
 	average_image = current_image.clone();
@@ -107,7 +109,8 @@ void MultipleImagesAverageY (cv::Mat filtered_image)
     	std::cout <<" Make sure that the file " << name << " is located in the right directory\n";
     	continue;
   	}
-		std::cout << name << std::endl;
+		if (print) 
+			std::cout << name << std::endl;
 
 		current_image = current_image / number_images;
 		average_image = average_image + current_image; // Soma das matrizes

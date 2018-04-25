@@ -4,10 +4,11 @@
 
 #include "filters.h"
 #include "masks.h"
+#include "template_finder.h"
 
 int main ()
 {
-	cv::Point start, end;
+	cv::Point start(410,494), end(496,611); // Regiao do template do aviao
 	cv::Mat airport, ycc_airport, filtered_image_1, filtered_image_2, final_image;
 
 	airport = cv::imread ("../images/1.bmp");
@@ -45,9 +46,10 @@ int main ()
 	
 	cv::cvtColor (filtered_image_2, final_image, cv::COLOR_YCrCb2BGR);
 
+
 	cv::imshow ("After Second Filter", final_image);
 	cv::waitKey (0);
 	cv::imwrite ("denoised_image.bmp", final_image);
 
-
+	project::GetTemplates (filtered_image_2, start, end);
 }
