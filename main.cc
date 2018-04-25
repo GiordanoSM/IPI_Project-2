@@ -7,40 +7,47 @@
 
 int main ()
 {
+	cv::Point start, end;
 	cv::Mat airport, ycc_airport, filtered_image_1, filtered_image_2, final_image;
 
-	airport = cv::imread ("1.bmp");
+	airport = cv::imread ("../images/1.bmp");
 
-	    // Check if image is loaded fine
+	// Check if image is loaded fine
   if( airport.empty())
   {
-    printf(" Error opening image\n");
-    printf(" Make sure that the file 1.bmp is in the same directory of your executable\n");
+    std::cout << " Error opening image\n";
+    std::cout << " Make sure that the file (../images/1.bmp) is located in the right directory\n";
     return -1;
   }
 
+  cv::imshow ("Original Image", airport);
+	cv::waitKey (0);
+
 	cv::cvtColor (airport, ycc_airport, cv::COLOR_BGR2YCrCb);
+
+	cv::imshow ("YCrCb Image", ycc_airport);
+	cv::waitKey (0);
 
 	filtered_image_1 = ycc_airport.clone();
 
-	project::GaussianFilteringY (ycc_airport, filtered_image_1);
+	project::MultipleImagesAverageY (filtered_image_1);
+
+	//project::GaussianFilteringY (ycc_airport, filtered_image_1);
 
 	filtered_image_2 = filtered_image_1.clone();
 
 	cv::cvtColor (filtered_image_1, final_image, cv::COLOR_YCrCb2BGR);
 
-	cv::imshow ("final", final_image);
+	cv::imshow ("After First Filter", final_image);
 	cv::waitKey (0);
 
 	project::SaltAndPepperFilteringCb (filtered_image_1, filtered_image_2);
 	
 	cv::cvtColor (filtered_image_2, final_image, cv::COLOR_YCrCb2BGR);
 
+	cv::imshow ("After Second Filter", final_image);
+	cv::waitKey (0);
+	cv::imwrite ("denoised_image.bmp", final_image);
 
-	cv::imshow ("airport", airport);
-	cv::waitKey (0);
-	cv::imshow ("ycc", ycc_airport);
-	cv::waitKey (0);
-	cv::imshow ("final_2", final_image);
-	cv::waitKey (0);
+
 }

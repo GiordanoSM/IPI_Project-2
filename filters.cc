@@ -73,4 +73,55 @@ void SaltAndPepperFilteringCb (cv::Mat YCrCb_image, cv::Mat filtered_image)
 	}
 } // SaltAndPeperFilteringCb
 
+void MultipleImagesAverageY (cv::Mat filtered_image) 
+{
+	int counter = 1, number_images = 100;
+	int rows, cols;
+	std::string address = "../images/";
+	std::string extension = ".bmp"; // Extensao do arquivo
+	std::string number;
+	std::string name; // Nome completo do arquivo
+	cv::Mat current_image, average_image_Y, average_image;
+
+	// Operacoes primeiro serao feitas em BGR, visto que a transformacao para o espaco Y e linear
+
+	// Para counter = 1; (ja foi verificada a existencia de 1.bmp em main.cc)
+	number = std::to_string (counter);
+	name = address + number + extension;
+	current_image = cv::imread (name);
+
+	std::cout << name << std::endl;
+
+	current_image = current_image / number_images;
+	average_image = current_image.clone();
+
+	for (counter = 2; counter <= number_images; counter ++)
+	{
+		number = std::to_string (counter);
+		name = address + number + extension;
+		current_image = cv::imread (name);
+
+		if( current_image.empty())
+ 	 	{
+   		std::cout <<" \nError opening image. Result not trustable.\n";
+    	std::cout <<" Make sure that the file " << name << " is located in the right directory\n";
+    	continue;
+  	}
+		std::cout << name << std::endl;
+
+		current_image = current_image / number_images;
+		average_image = average_image + current_image; // Soma das matrizes
+	}
+
+	cv::cvtColor (average_image, average_image_Y, cv::COLOR_BGR2GRAY);
+
+	for (rows = 0; rows < average_image_Y.rows; rows ++)
+	{
+		for (cols = 0; cols < average_image_Y.cols; cols ++)
+		{
+			filtered_image.at<cv::Vec3b>(rows, cols).val[0] = average_image_Y.at<uchar>(rows, cols);
+		}
+	}
+}
+
 } // namespace project
