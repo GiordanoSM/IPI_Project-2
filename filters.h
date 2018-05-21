@@ -21,6 +21,10 @@ void SaltAndPepperFilteringCb (cv::Mat YCrCb_image, cv::Mat filtered_image);
 
 void MultipleImagesAverageY (cv::Mat filtered_image);
 
+// Aplica o filtro de notch em dois pares de notches na camada Cr no dominio da frequencia da imagem
+
+void NotchFilteringCr (cv::Mat YCrCb_image, cv::Mat filtered_image);
+
 } // namespace project
 
 

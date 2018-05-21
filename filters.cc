@@ -1,9 +1,11 @@
 #include "filters.h"
 #include "masks.h"
+#include "color_converter.h"
+#include "transformations.h"
 
 namespace project {
 
-void GaussianFilteringY (cv::Mat YCrCb_image, cv::Mat filtered_image) 
+void GaussianFilteringY (cv::Mat YCrCb_image, cv::Mat filtered_image) // Nao usada
 {
 	int rows, cols, region_rows, region_cols;
 	const int region_height = 3; // Deve ser um valor impar para ser formada uma mascara com um pixel central
@@ -116,7 +118,7 @@ void MultipleImagesAverageY (cv::Mat filtered_image)
 		average_image = average_image + current_image; // Soma das matrizes
 	}
 
-	cv::cvtColor (average_image, average_image_Y, cv::COLOR_BGR2GRAY);
+	average_image_Y = colorcv::CvtColorBGR2GRAY (average_image);
 
 	for (rows = 0; rows < average_image_Y.rows; rows ++)
 	{
@@ -126,5 +128,54 @@ void MultipleImagesAverageY (cv::Mat filtered_image)
 		}
 	}
 }
+
+void NotchFilteringCr (cv::Mat YCrCb_image, cv::Mat filtered_image)
+{
+	cv::Mat vis_freq_image, save_freq_image;
+	int notch_number;
+	float normalizer;
+	const int number_notches = 12;
+	std::vector <cv::Point> notch;
+	notch.resize(number_notches);
+
+	notch[0] = cv::Point (288,288);
+	notch[2] = cv::Point (432,288);
+	notch[4] = cv::Point (144,288);
+	notch[6] = cv::Point (576,288);
+	notch[8] = cv::Point (288,144);
+	notch[10] = cv::Point (432,144);
+
+	for (notch_number = 0; notch_number < number_notches; notch_number += 2)
+	{
+		// Adquirindo a coluna do notch simetrico
+
+		notch[notch_number + 1].x = (YCrCb_image.cols - 1) - notch[notch_number].x; 
+
+		notch[notch_number + 1].y = (YCrCb_image.rows- 1) - notch[notch_number].y; 
+	}
+
+	// Transforma YCrCb_image pra o dominio da frequencia e recentraliza seus elementos
+	//  Alem disso, retorna freq_image_cr, a imagem modificada propriamente para visualizacao
+	vis_freq_image = FourierTransformCr(YCrCb_image, &normalizer);
+
+	save_freq_image = vis_freq_image * 255;
+
+	cv::imwrite ("fourier.bmp", save_freq_image);
+	cv::imshow ("Fourier Cr", vis_freq_image);
+	cv::waitKey (0);
+	cv::destroyWindow ("Fourier Cr");
+
+	GaussianNotchMask (vis_freq_image, notch);
+
+	save_freq_image = vis_freq_image * 255;
+
+	cv::imwrite ("fourier_filtered.bmp", save_freq_image);
+	cv::imshow ("Fourier Filtered Cr", vis_freq_image);
+	cv::waitKey (0);
+	cv::destroyWindow ("Fourier Filtered Cr");
+
+	FourierInverseTransformCr (vis_freq_image, filtered_image, normalizer);
+
+} // NotchFilteringCr
 
 } // namespace project
